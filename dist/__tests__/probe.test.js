@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const index_1 = require("../index");
+const index_1 = __importDefault(require("../index"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const Schema = mongoose_1.default.Schema;
 describe('MSTDOG', () => {
@@ -14,7 +14,7 @@ describe('MSTDOG', () => {
             isActive: Boolean,
             birthdate: Date
         });
-        const mockData = (0, index_1.mstdog)(TestSchema.paths);
+        const mockData = (0, index_1.default)(TestSchema.paths);
         // Check if the generated mock data has the expected fields
         expect(mockData).toHaveProperty('name');
         expect(typeof mockData.name).toBe('string');
@@ -78,8 +78,7 @@ describe('MSTDOG', () => {
             customData: Schema.Types.Mixed,
             _someId: Schema.Types.ObjectId // ObjectId type
         });
-        const mockData = (0, index_1.mstdog)(UserSchema.paths);
-        console.log(mockData);
+        const mockData = (0, index_1.default)(UserSchema.paths);
         // Check if the generated mock data has the expected fields
         expect(mockData).toHaveProperty('name');
         expect(typeof mockData.name).toBe('string');

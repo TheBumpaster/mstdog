@@ -1,4 +1,4 @@
-export declare function mstdog(paths: {
+export default function mstdog(paths: {
     [key: string]: any;
 }): {
     [key: string]: any;
