@@ -1,6 +1,6 @@
 {
   "name": "mstdog",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Mongoose Schema To Dummy Object Generator",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,6 +20,10 @@
     "dummy"
   ],
   "author": "The Bumpaster",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheBumpaster/mstdog.git"
+  },
   "license": "MIT",
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
