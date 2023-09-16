@@ -1,7 +1,7 @@
 import {Schema, Types} from "mongoose";
 import {faker} from "@faker-js/faker"
 
-export function mstdog(paths: { [key: string]: any }) {
+export default function mstdog(paths: { [key: string]: any }) {
     const mockData: { [key: string]: any } = {};
 
     Object.keys(paths).forEach((key) => {
@@ -10,7 +10,7 @@ export function mstdog(paths: { [key: string]: any }) {
         if (!field) return;
 
         if (field instanceof Function) {
-            mockData[key] = generateValueForType(field.name);
+            mockData[key] = generateValueForType(field.name, field.enumValues && field.enumValues.length > 0 ? field.enumValues : undefined);
             return;
         }
 
@@ -31,10 +31,16 @@ export function mstdog(paths: { [key: string]: any }) {
             const typeField = field.type || (field.options && field.options.type);
             if (!typeField) return;
 
+            let enumValues = field.enumValues
+
+            if (enumValues === undefined && field.options !== undefined) {
+                enumValues = field.options.enum ?? undefined;
+            }
+
             if (Array.isArray(typeField)) {
-                mockData[key] = handleArrayField(typeField);
+                mockData[key] = handleArrayField(typeField, enumValues);
             } else {
-                mockData[key] = generateValueForType(typeField.name || typeField);
+                mockData[key] = generateValueForType(typeField.name || typeField, enumValues && enumValues.length > 0 ? enumValues : undefined);
             }
         }
     });
@@ -42,18 +48,21 @@ export function mstdog(paths: { [key: string]: any }) {
     return mockData;
 }
 
-function handleArrayField(field: any[]) {
+function handleArrayField(field: any[], enumValues?: string[]) {
     if (field[0] instanceof Schema || field[0] instanceof Schema.Types.Subdocument) {
         return Array.from({ length: 3 }, () => mstdog(field[0].paths || field[0].schema.paths));
     } else if (field[0] instanceof Function) {
-        return Array.from({ length: 3 }, () => generateValueForType(field[0].name));
+        return Array.from({ length: 3 }, () => generateValueForType(field[0].name, enumValues && enumValues.length > 0 ? enumValues : undefined));
     }
     return [];
 }
 
-function generateValueForType(type: any) {
+function generateValueForType(type: string, enumValue?: string[]) {
     switch (type) {
         case 'String':
+            if (enumValue) {
+                return faker.helpers.arrayElement(enumValue)
+            }
             return faker.string.alphanumeric({ length: 6})
         case 'Number':
             return faker.number.int({ max: 15 })

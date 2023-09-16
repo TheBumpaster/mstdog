@@ -1,4 +1,4 @@
-import {mstdog} from '../index';
+import mstdog from '../index';
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;

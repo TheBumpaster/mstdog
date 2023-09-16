@@ -3,6 +3,8 @@
 
 Generate realistic mock data for your Mongoose schemas with ease.
 
+---
+
 ## Description
 
 `mstdog` is a simple and efficient tool to generate mock data based on your Mongoose schemas. It supports various field types, embedded subdocuments, arrays, and more. Integrated with the `faker` library, it ensures that you get realistic mock data for each field type.
@@ -18,23 +20,29 @@ npm install mstdog --save-dev
 ## Usage
 
 ```javascript
-import { generateMockDataForSchema } from 'mstdog';
-import { YourMongooseSchema } from './path-to-your-schema';
+import mstdog from 'mstdog';
 
-const mockData = generateMockDataForSchema(YourMongooseSchema.paths);
+const yourSchema = new Schema({
+    name: String,
+    age: Number,
+    isActive: Boolean,
+    birthdate: Date
+});
+
+const mockData = mstdog(yourSchema.paths);
 console.log(mockData);
 ```
 
 ### Supported Field Types
 
-- String
+- String _( supports enum )_
 - Number
 - Date
 - Boolean
 - ObjectId
 - Mixed
 - Embedded subdocuments
-- Arrays of basic types and subdocuments
+- Arrays of basic types and subdocuments _( supports enum )_
 
 ## Contributing
 
@@ -42,8 +50,6 @@ Feedback, bug reports, and pull requests are welcome. Feel free to improve and s
 
 ## License
 
-[MIT](LICENSE)
+[MIT](./LICENSE)
 
 ---
-
-You can customize this template further based on your needs. Make sure to include a `LICENSE` file in your repository if you reference it in the README. The MIT license is commonly used for open-source projects, but you can choose any license you prefer.
