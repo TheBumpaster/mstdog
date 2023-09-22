@@ -58,21 +58,21 @@ function handleArrayField(field: any[], enumValues?: string[]) {
 }
 
 function generateValueForType(type: string, enumValue?: string[]) {
-    switch (type) {
-        case 'String':
+    switch (type.toLowerCase()) {
+        case 'string':
             if (enumValue) {
                 return faker.helpers.arrayElement(enumValue)
             }
             return faker.string.alphanumeric({ length: 6})
-        case 'Number':
+        case 'number':
             return faker.number.int({ max: 15 })
-        case 'Date':
+        case 'date':
             return faker.date.recent()
-        case 'Boolean':
+        case 'boolean':
             return faker.datatype.boolean()
-        case 'ObjectId':
+        case 'objectid':
             return new Types.ObjectId().toHexString();
-        case 'Mixed':
+        case 'mixed':
             return {
                 a: faker.string.alphanumeric(5),
                 b: faker.number.int({max: 8})
