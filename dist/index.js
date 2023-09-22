@@ -54,7 +54,6 @@ function handleArrayField(field, enumValues) {
     return [];
 }
 function generateValueForType(type, enumValue) {
-    console.log(type);
     switch (type.toLowerCase()) {
         case 'string':
             if (enumValue) {
@@ -78,20 +77,4 @@ function generateValueForType(type, enumValue) {
             return 'Unknown Type';
     }
 }
-const TestSchema = new mongoose_1.Schema({
-    name: {
-        type: 'string'
-    },
-    age: {
-        type: 'number'
-    },
-    isActive: {
-        type: 'boolean'
-    },
-    birthdate: {
-        type: 'date'
-    }
-});
-const mockData = mstdog(TestSchema.paths);
-console.log(mockData);
 //# sourceMappingURL=index.js.map
