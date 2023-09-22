@@ -1,11 +1,11 @@
 {
   "name": "mstdog",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Mongoose Schema To Dummy Object Generator",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "engines": {
-    "node": "=>18.0.0"
+    "node": "^18.0.0"
   },
   "scripts": {
     "start": "node dist/index.js",

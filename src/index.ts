@@ -60,16 +60,21 @@ function handleArrayField(field: any[], enumValues?: string[]) {
 function generateValueForType(type: string, enumValue?: string[]) {
     switch (type.toLowerCase()) {
         case 'string':
-            if (enumValue) {
-                return faker.helpers.arrayElement(enumValue)
-            }
-            return faker.string.alphanumeric({ length: 6})
+            return handleStringType(enumValue);
+        case 'schemastring':
+            return handleStringType(enumValue);
         case 'number':
-            return faker.number.int({ max: 15 })
+            return handleNumberType();
+        case 'schemanumber':
+            return handleNumberType();
         case 'date':
-            return faker.date.recent()
+            return handleDateType();
+        case 'schemadate':
+            return handleDateType();
         case 'boolean':
-            return faker.datatype.boolean()
+            return handleBooleanType();
+        case 'schemaboolean':
+            return handleBooleanType();
         case 'objectid':
             return new Types.ObjectId().toHexString();
         case 'mixed':
@@ -80,4 +85,23 @@ function generateValueForType(type: string, enumValue?: string[]) {
         default:
             return 'Unknown Type';
     }
+}
+
+const handleStringType = (enumValue?: string[]): string => {
+    if (enumValue) {
+        return faker.helpers.arrayElement(enumValue)
+    }
+    return faker.string.alphanumeric({ length: 6})
+}
+
+const handleNumberType = (): number => {
+    return faker.number.int({ max: 15 })
+}
+
+const handleDateType = (): Date => {
+    return faker.date.recent()
+}
+
+const handleBooleanType = (): Boolean => {
+    return faker.datatype.boolean()
 }

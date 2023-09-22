@@ -56,16 +56,21 @@ function handleArrayField(field, enumValues) {
 function generateValueForType(type, enumValue) {
     switch (type.toLowerCase()) {
         case 'string':
-            if (enumValue) {
-                return faker_1.faker.helpers.arrayElement(enumValue);
-            }
-            return faker_1.faker.string.alphanumeric({ length: 6 });
+            return handleStringType(enumValue);
+        case 'schemastring':
+            return handleStringType(enumValue);
         case 'number':
-            return faker_1.faker.number.int({ max: 15 });
+            return handleNumberType();
+        case 'schemanumber':
+            return handleNumberType();
         case 'date':
-            return faker_1.faker.date.recent();
+            return handleDateType();
+        case 'schemadate':
+            return handleDateType();
         case 'boolean':
-            return faker_1.faker.datatype.boolean();
+            return handleBooleanType();
+        case 'schemaboolean':
+            return handleBooleanType();
         case 'objectid':
             return new mongoose_1.Types.ObjectId().toHexString();
         case 'mixed':
@@ -77,4 +82,19 @@ function generateValueForType(type, enumValue) {
             return 'Unknown Type';
     }
 }
+const handleStringType = (enumValue) => {
+    if (enumValue) {
+        return faker_1.faker.helpers.arrayElement(enumValue);
+    }
+    return faker_1.faker.string.alphanumeric({ length: 6 });
+};
+const handleNumberType = () => {
+    return faker_1.faker.number.int({ max: 15 });
+};
+const handleDateType = () => {
+    return faker_1.faker.date.recent();
+};
+const handleBooleanType = () => {
+    return faker_1.faker.datatype.boolean();
+};
 //# sourceMappingURL=index.js.map
