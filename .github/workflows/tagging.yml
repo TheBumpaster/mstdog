@@ -17,5 +17,7 @@ jobs:
       run: |
         BRANCH_NAME=${GITHUB_REF#refs/heads/}
         TAG_NAME=${BRANCH_NAME#release/}
+        git config --local user.email "hadzicismar67@gmail.com"
+        git config --local user.name "GitHub TheBumpaster"
         git tag $TAG_NAME
         git push https://${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git HEAD:$TAG_NAME
