@@ -54,21 +54,22 @@ function handleArrayField(field, enumValues) {
     return [];
 }
 function generateValueForType(type, enumValue) {
-    switch (type) {
-        case 'String':
+    console.log(type);
+    switch (type.toLowerCase()) {
+        case 'string':
             if (enumValue) {
                 return faker_1.faker.helpers.arrayElement(enumValue);
             }
             return faker_1.faker.string.alphanumeric({ length: 6 });
-        case 'Number':
+        case 'number':
             return faker_1.faker.number.int({ max: 15 });
-        case 'Date':
+        case 'date':
             return faker_1.faker.date.recent();
-        case 'Boolean':
+        case 'boolean':
             return faker_1.faker.datatype.boolean();
-        case 'ObjectId':
+        case 'objectid':
             return new mongoose_1.Types.ObjectId().toHexString();
-        case 'Mixed':
+        case 'mixed':
             return {
                 a: faker_1.faker.string.alphanumeric(5),
                 b: faker_1.faker.number.int({ max: 8 })
@@ -77,4 +78,20 @@ function generateValueForType(type, enumValue) {
             return 'Unknown Type';
     }
 }
+const TestSchema = new mongoose_1.Schema({
+    name: {
+        type: 'string'
+    },
+    age: {
+        type: 'number'
+    },
+    isActive: {
+        type: 'boolean'
+    },
+    birthdate: {
+        type: 'date'
+    }
+});
+const mockData = mstdog(TestSchema.paths);
+console.log(mockData);
 //# sourceMappingURL=index.js.map
