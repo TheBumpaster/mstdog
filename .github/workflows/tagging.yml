@@ -1,0 +1,21 @@
+name: Create Tag on Release Branch Creation
+
+on:
+  create:
+    branches:
+      - 'release/v*.*.*' # This will trigger the workflow for branches in the format release/vx.x.x
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Extract version from branch name and create tag
+      run: |
+        BRANCH_NAME=${GITHUB_REF#refs/heads/}
+        TAG_NAME=${BRANCH_NAME#release/}
+        git tag $TAG_NAME
+        git push origin $TAG_NAME
