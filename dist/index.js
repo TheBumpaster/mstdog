@@ -35,10 +35,18 @@ function mstdog(paths) {
             }
             if (Array.isArray(typeField)) {
                 mockData[key] = handleArrayField(typeField, enumValues);
+                return;
             }
-            else {
-                mockData[key] = generateValueForType(typeField.name || typeField, enumValues && enumValues.length > 0 ? enumValues : undefined);
+            if (typeField instanceof mongoose_1.Schema) {
+                mockData[key] = mstdog(typeField.paths);
+                return;
             }
+            else if (typeField instanceof mongoose_1.Schema.Types.Subdocument) {
+                mockData[key] = mstdog(typeField.schema.paths);
+                return;
+            }
+            mockData[key] = generateValueForType(typeField.name || typeField, enumValues && enumValues.length > 0 ? enumValues : undefined);
+            return;
         }
     });
     return mockData;
