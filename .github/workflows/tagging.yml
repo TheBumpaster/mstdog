@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+          token: ${{ secrets.PAT_TOKEN }}
 
     - name: Extract version from branch name and create tag
       run: |
