@@ -25,6 +25,32 @@ describe('MSTDOG', () => {
         expect(mockData).toHaveProperty('birthdate');
         expect(mockData.birthdate).toBeInstanceOf(Date);
     });
+    it('should generate mock data for an abstract schema', () => {
+        const TestSchema = new Schema({
+            name: {
+                type: 'string'
+            },
+            age: {
+                type: 'number'
+            },
+            isActive: {
+                type: 'boolean'
+            },
+            birthdate: {
+                type: 'date'
+            }
+        });
+        const mockData = (0, index_1.default)(TestSchema.paths);
+        // Check if the generated mock data has the expected fields
+        expect(mockData).toHaveProperty('name');
+        expect(typeof mockData.name).toBe('string');
+        expect(mockData).toHaveProperty('age');
+        expect(typeof mockData.age).toBe('number');
+        expect(mockData).toHaveProperty('isActive');
+        expect(typeof mockData.isActive).toBe('boolean');
+        expect(mockData).toHaveProperty('birthdate');
+        expect(mockData.birthdate).toBeInstanceOf(Date);
+    });
     it('should generate mock data for a complex User schema', () => {
         // Embedded subdocument
         const AddressSchema = new Schema({
