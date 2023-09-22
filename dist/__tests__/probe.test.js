@@ -1,10 +1,33 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = __importDefault(require("../index"));
-const mongoose_1 = __importDefault(require("mongoose"));
+const mongoose_1 = __importStar(require("mongoose"));
 const Schema = mongoose_1.default.Schema;
 describe('MSTDOG', () => {
     it('should generate mock data for a simple schema', () => {
@@ -38,6 +61,32 @@ describe('MSTDOG', () => {
             },
             birthdate: {
                 type: 'date'
+            }
+        });
+        const mockData = (0, index_1.default)(TestSchema.paths);
+        // Check if the generated mock data has the expected fields
+        expect(mockData).toHaveProperty('name');
+        expect(typeof mockData.name).toBe('string');
+        expect(mockData).toHaveProperty('age');
+        expect(typeof mockData.age).toBe('number');
+        expect(mockData).toHaveProperty('isActive');
+        expect(typeof mockData.isActive).toBe('boolean');
+        expect(mockData).toHaveProperty('birthdate');
+        expect(mockData.birthdate).toBeInstanceOf(Date);
+    });
+    it('should generate mock data for an schema consuming mongoose schema types', () => {
+        const TestSchema = new Schema({
+            name: {
+                type: mongoose_1.SchemaTypes.String
+            },
+            age: {
+                type: mongoose_1.SchemaTypes.Number
+            },
+            isActive: {
+                type: mongoose_1.SchemaTypes.Boolean
+            },
+            birthdate: {
+                type: mongoose_1.SchemaTypes.Date
             }
         });
         const mockData = (0, index_1.default)(TestSchema.paths);

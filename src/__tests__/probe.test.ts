@@ -1,5 +1,5 @@
 import mstdog from '../index';
-import mongoose from 'mongoose';
+import mongoose, {SchemaTypes} from 'mongoose';
 
 const Schema = mongoose.Schema;
 
@@ -41,6 +41,38 @@ describe('MSTDOG', () => {
             },
             birthdate: {
                 type: 'date'
+            }
+        });
+
+        const mockData = mstdog(TestSchema.paths);
+
+        // Check if the generated mock data has the expected fields
+        expect(mockData).toHaveProperty('name');
+        expect(typeof mockData.name).toBe('string');
+
+        expect(mockData).toHaveProperty('age');
+        expect(typeof mockData.age).toBe('number');
+
+        expect(mockData).toHaveProperty('isActive');
+        expect(typeof mockData.isActive).toBe('boolean');
+
+        expect(mockData).toHaveProperty('birthdate');
+        expect(mockData.birthdate).toBeInstanceOf(Date);
+    });
+
+    it('should generate mock data for an schema consuming mongoose schema types', () => {
+        const TestSchema = new Schema({
+            name: {
+                type: SchemaTypes.String
+            },
+            age: {
+                type: SchemaTypes.Number
+            },
+            isActive: {
+                type: SchemaTypes.Boolean
+            },
+            birthdate: {
+                type: SchemaTypes.Date
             }
         });
 
