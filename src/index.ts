@@ -1,4 +1,4 @@
-import {Schema, Types} from "mongoose";
+import {Schema, SchemaTypes, Types} from "mongoose";
 import {faker} from "@faker-js/faker"
 
 export default function mstdog(paths: { [key: string]: any }) {
@@ -39,9 +39,19 @@ export default function mstdog(paths: { [key: string]: any }) {
 
             if (Array.isArray(typeField)) {
                 mockData[key] = handleArrayField(typeField, enumValues);
-            } else {
-                mockData[key] = generateValueForType(typeField.name || typeField, enumValues && enumValues.length > 0 ? enumValues : undefined);
+                return;
             }
+
+            if (typeField instanceof Schema) {
+                mockData[key] = mstdog(typeField.paths);
+                return;
+            } else if (typeField instanceof Schema.Types.Subdocument) {
+                mockData[key] = mstdog(typeField.schema.paths);
+                return;
+            }
+
+            mockData[key] = generateValueForType(typeField.name || typeField, enumValues && enumValues.length > 0 ? enumValues : undefined);
+            return;
         }
     });
 
