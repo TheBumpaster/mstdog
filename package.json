@@ -28,6 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
+    "randexp": "^0.5.3",
     "mongoose": "^7.5.2",
     "typescript": "^5.2.2"
   },
