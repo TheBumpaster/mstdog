@@ -10,6 +10,9 @@ type MstdogOptions = {
     customFieldGenerators?: {
         [key: string]: () => any;
     };
+    typeGenerators?: {
+        [type: string]: () => any;
+    };
 }
 
 const defaultOptions: MstdogDefaultOptions = {
@@ -58,7 +61,7 @@ export default function mstdog(paths: { [key: string]: any }, options: MstdogOpt
         }
 
         if (typeof field === 'function') {
-            mockData[key] = generateValueForType(field.name, getEnumValues(field));
+            mockData[key] = generateValueForType(field.name, _options, getEnumValues(field));
             return;
         }
 
@@ -97,7 +100,7 @@ export default function mstdog(paths: { [key: string]: any }, options: MstdogOpt
                 return;
             }
 
-            mockData[key] = generateValueForType(typeField.name || typeField, enumValues);
+            mockData[key] = generateValueForType(typeField.name || typeField, _options, enumValues);
             return;
         }
     });
@@ -110,24 +113,28 @@ function handleArrayField(field: any[], options: MstdogDefaultOptions, enumValue
         return Array.from({ length: options.arrayLength }, () => mstdog(field[0].paths || field[0].schema.paths, options));
     } else if (typeof field[0] === 'function' || (field[0] && typeof field[0].type === 'function')) {
         const fieldType = typeof field[0] === 'function' ? field[0] : field[0].type;
-        return Array.from({ length: options.arrayLength }, () => generateValueForType(fieldType.name, enumValues));
+        return Array.from({ length: options.arrayLength }, () => generateValueForType(fieldType.name, options, enumValues));
     }
     return [];
 }
 
-function generateValueForType(type: string, enumValue?: string[]) {
-    switch (type.toLowerCase()) {
+function generateValueForType(type: string, options: MstdogOptions, enumValue?: string[]) {
+    // Normalize type for consistent generator lookup
+    const normalizedType = type.toLowerCase().replace('schema', '');
+
+    // Check for a custom type generator before handling with default methods
+    if (options.typeGenerators && options.typeGenerators[normalizedType]) {
+        return options.typeGenerators[normalizedType]();
+    }
+
+    switch (normalizedType) {
         case 'string':
-        case 'schemastring':
             return handleStringType(enumValue);
         case 'number':
-        case 'schemanumber':
             return handleNumberType();
         case 'date':
-        case 'schemadate':
             return handleDateType();
         case 'boolean':
-        case 'schemaboolean':
             return handleBooleanType();
         case 'objectid':
             return new Types.ObjectId().toHexString();
@@ -141,6 +148,7 @@ function generateValueForType(type: string, enumValue?: string[]) {
             return 'Unknown Type';
     }
 }
+
 
 function handleStringType(enumValue?: string[]): string {
     if (enumValue && enumValue.length > 0) {

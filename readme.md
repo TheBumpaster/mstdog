@@ -90,6 +90,25 @@ const mockDataWithOptions = mstdog(yourSchema.paths, options);
 console.log(mockDataWithOptions);
 ```
 
+### Type Generators
+
+`mstdog` allows you to customize how data is generated for specific types using the `typeGenerators` option. This enables overriding the default data generation logic provided by the library.
+
+Example using `typeGenerators`:
+
+```javascript
+const options = {
+    typeGenerators: {
+        string: () => 'Custom string',  // Applies to both `string` and `schemastring`
+        number: () => 42,
+        date: () => new Date('2020-01-01')
+    }
+};
+
+const mockData = mstdog(yourSchema.paths, options);
+console.log(mockData);
+```
+
 ## Contributing
 
 Feedback, bug reports, and pull requests are welcome. Feel free to improve and suggest any changes.

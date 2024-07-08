@@ -6,6 +6,7 @@ const defaultOptions = {
     arrayLength: 3,
     maxDepth: 5,
     currentDepth: 0,
+    handleRefs: false
 };
 function mstdog(paths, options = {}) {
     const _options = Object.assign(Object.assign({}, defaultOptions), options);
@@ -15,7 +16,7 @@ function mstdog(paths, options = {}) {
     }
     const mockData = {};
     Object.keys(paths).forEach((key) => {
-        var _a;
+        var _a, _b, _c, _d;
         const field = paths[key];
         if (!field)
             return;
@@ -23,8 +24,13 @@ function mstdog(paths, options = {}) {
             mockData[key] = _options.customFieldGenerators[key]();
             return;
         }
+        let refSchemaName = typeof ((_b = field.options) === null || _b === void 0 ? void 0 : _b.ref) === 'function' ? (_c = field.options) === null || _c === void 0 ? void 0 : _c.ref() : (_d = field.options) === null || _d === void 0 ? void 0 : _d.ref;
+        if (refSchemaName && _options.handleRefs && _options.schemas && _options.schemas[refSchemaName]) {
+            mockData[key] = mstdog(_options.schemas[refSchemaName].paths, Object.assign(Object.assign({}, _options), { currentDepth: 0 }));
+            return;
+        }
         if (typeof field === 'function') {
-            mockData[key] = generateValueForType(field.name, getEnumValues(field));
+            mockData[key] = generateValueForType(field.name, _options, getEnumValues(field));
             return;
         }
         if (field instanceof mongoose_1.Schema) {
@@ -60,7 +66,7 @@ function mstdog(paths, options = {}) {
                 mockData[key] = Array.from({ length: _options.arrayLength }, () => mstdog(typeField.schema.paths, _options));
                 return;
             }
-            mockData[key] = generateValueForType(typeField.name || typeField, enumValues);
+            mockData[key] = generateValueForType(typeField.name || typeField, _options, enumValues);
             return;
         }
     });
@@ -73,23 +79,25 @@ function handleArrayField(field, options, enumValues) {
     }
     else if (typeof field[0] === 'function' || (field[0] && typeof field[0].type === 'function')) {
         const fieldType = typeof field[0] === 'function' ? field[0] : field[0].type;
-        return Array.from({ length: options.arrayLength }, () => generateValueForType(fieldType.name, enumValues));
+        return Array.from({ length: options.arrayLength }, () => generateValueForType(fieldType.name, options, enumValues));
     }
     return [];
 }
-function generateValueForType(type, enumValue) {
-    switch (type.toLowerCase()) {
+function generateValueForType(type, options, enumValue) {
+    // Normalize type for consistent generator lookup
+    const normalizedType = type.toLowerCase().replace('schema', '');
+    // Check for a custom type generator before handling with default methods
+    if (options.typeGenerators && options.typeGenerators[normalizedType]) {
+        return options.typeGenerators[normalizedType]();
+    }
+    switch (normalizedType) {
         case 'string':
-        case 'schemastring':
             return handleStringType(enumValue);
         case 'number':
-        case 'schemanumber':
             return handleNumberType();
         case 'date':
-        case 'schemadate':
             return handleDateType();
         case 'boolean':
-        case 'schemaboolean':
             return handleBooleanType();
         case 'objectid':
             return new mongoose_1.Types.ObjectId().toHexString();
