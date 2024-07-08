@@ -2,81 +2,93 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const faker_1 = require("@faker-js/faker");
-function mstdog(paths) {
+const defaultOptions = {
+    arrayLength: 3,
+    maxDepth: 5,
+    currentDepth: 0,
+};
+function mstdog(paths, options = {}) {
+    const _options = Object.assign(Object.assign({}, defaultOptions), options);
+    _options.currentDepth += 1;
+    if (_options.currentDepth > _options.maxDepth) {
+        return {};
+    }
     const mockData = {};
     Object.keys(paths).forEach((key) => {
         var _a;
         const field = paths[key];
         if (!field)
             return;
-        if (field instanceof Function) {
-            mockData[key] = generateValueForType(field.name, field.enumValues && field.enumValues.length > 0 ? field.enumValues : undefined);
+        if ((_a = _options.customFieldGenerators) === null || _a === void 0 ? void 0 : _a[key]) {
+            mockData[key] = _options.customFieldGenerators[key]();
+            return;
+        }
+        if (typeof field === 'function') {
+            mockData[key] = generateValueForType(field.name, getEnumValues(field));
             return;
         }
         if (field instanceof mongoose_1.Schema) {
-            mockData[key] = mstdog(field.paths);
+            mockData[key] = mstdog(field.paths, _options);
             return;
         }
         else if (field instanceof mongoose_1.Schema.Types.Subdocument) {
-            mockData[key] = mstdog(field.schema.paths);
+            mockData[key] = mstdog(field.schema.paths, _options);
             return;
         }
         if (Array.isArray(field)) {
-            mockData[key] = handleArrayField(field);
+            mockData[key] = handleArrayField(field, _options);
             return;
         }
         if (typeof field === "object") {
             const typeField = field.type || (field.options && field.options.type);
             if (!typeField)
                 return;
-            let enumValues = field.enumValues;
-            if (enumValues === undefined && field.options !== undefined) {
-                enumValues = (_a = field.options.enum) !== null && _a !== void 0 ? _a : undefined;
-            }
+            let enumValues = getEnumValues(field);
             if (Array.isArray(typeField)) {
-                mockData[key] = handleArrayField(typeField, enumValues);
+                mockData[key] = handleArrayField(typeField, _options, enumValues);
                 return;
             }
             if (typeField instanceof mongoose_1.Schema) {
-                mockData[key] = mstdog(typeField.paths);
+                mockData[key] = mstdog(typeField.paths, _options);
                 return;
             }
             else if (typeField instanceof mongoose_1.Schema.Types.Subdocument) {
-                mockData[key] = mstdog(typeField.schema.paths);
+                mockData[key] = mstdog(typeField.schema.paths, _options);
                 return;
             }
-            mockData[key] = generateValueForType(typeField.name || typeField, enumValues && enumValues.length > 0 ? enumValues : undefined);
+            else if (typeField instanceof mongoose_1.Schema.Types.DocumentArray) {
+                mockData[key] = Array.from({ length: _options.arrayLength }, () => mstdog(typeField.schema.paths, _options));
+                return;
+            }
+            mockData[key] = generateValueForType(typeField.name || typeField, enumValues);
             return;
         }
     });
     return mockData;
 }
 exports.default = mstdog;
-function handleArrayField(field, enumValues) {
-    if (field[0] instanceof mongoose_1.Schema || field[0] instanceof mongoose_1.Schema.Types.Subdocument) {
-        return Array.from({ length: 3 }, () => mstdog(field[0].paths || field[0].schema.paths));
+function handleArrayField(field, options, enumValues) {
+    if (field[0] instanceof mongoose_1.Schema || field[0] instanceof mongoose_1.Schema.Types.Subdocument || field[0] instanceof mongoose_1.Schema.Types.DocumentArray) {
+        return Array.from({ length: options.arrayLength }, () => mstdog(field[0].paths || field[0].schema.paths, options));
     }
-    else if (field[0] instanceof Function) {
-        return Array.from({ length: 3 }, () => generateValueForType(field[0].name, enumValues && enumValues.length > 0 ? enumValues : undefined));
+    else if (typeof field[0] === 'function' || (field[0] && typeof field[0].type === 'function')) {
+        const fieldType = typeof field[0] === 'function' ? field[0] : field[0].type;
+        return Array.from({ length: options.arrayLength }, () => generateValueForType(fieldType.name, enumValues));
     }
     return [];
 }
 function generateValueForType(type, enumValue) {
     switch (type.toLowerCase()) {
         case 'string':
-            return handleStringType(enumValue);
         case 'schemastring':
             return handleStringType(enumValue);
         case 'number':
-            return handleNumberType();
         case 'schemanumber':
             return handleNumberType();
         case 'date':
-            return handleDateType();
         case 'schemadate':
             return handleDateType();
         case 'boolean':
-            return handleBooleanType();
         case 'schemaboolean':
             return handleBooleanType();
         case 'objectid':
@@ -87,22 +99,27 @@ function generateValueForType(type, enumValue) {
                 b: faker_1.faker.number.int({ max: 8 })
             };
         default:
+            console.warn(`Unknown type: ${type}`);
             return 'Unknown Type';
     }
 }
-const handleStringType = (enumValue) => {
-    if (enumValue) {
+function handleStringType(enumValue) {
+    if (enumValue && enumValue.length > 0) {
         return faker_1.faker.helpers.arrayElement(enumValue);
     }
     return faker_1.faker.string.alphanumeric({ length: 6 });
-};
-const handleNumberType = () => {
+}
+function handleNumberType() {
     return faker_1.faker.number.int({ max: 15 });
-};
-const handleDateType = () => {
+}
+function handleDateType() {
     return faker_1.faker.date.recent();
-};
-const handleBooleanType = () => {
+}
+function handleBooleanType() {
     return faker_1.faker.datatype.boolean();
-};
+}
+function getEnumValues(field) {
+    var _a, _b, _c;
+    return (_c = (_a = field.enumValues) !== null && _a !== void 0 ? _a : (_b = field.options) === null || _b === void 0 ? void 0 : _b.enum) !== null && _c !== void 0 ? _c : undefined;
+}
 //# sourceMappingURL=index.js.map
