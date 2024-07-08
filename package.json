@@ -1,6 +1,6 @@
 {
   "name": "mstdog",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "Mongoose Schema To Dummy Object Generator",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -28,6 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@faker-js/faker": "^8.0.2",
+    "randexp": "^0.5.3",
     "mongoose": "^7.5.2",
     "typescript": "^5.2.2"
   },
