@@ -64,7 +64,7 @@ function sortFieldsByDependencies(paths: { [key: string]: any }, dependencies: D
 
     let sortedFields: string[] = [];
     let resolved = new Set<string>();
-    let visiting = new Set<string>();  // Track visiting for cycle detection
+    let visiting = new Set<string>();
 
     function visit(field: string, stack: string[] = []) {
         if (resolved.has(field)) return;
@@ -80,7 +80,7 @@ function sortFieldsByDependencies(paths: { [key: string]: any }, dependencies: D
             if (!paths[dep] && !schemaDependencies[dep]) {
                 console.warn(`Dependency '${dep}' for field '${field}' is not defined in paths or dependencies.`);
             } else {
-                visit(dep, stack.slice());  // Use slice to pass a copy of the stack
+                visit(dep, stack.slice());
             }
         });
 
@@ -108,7 +108,6 @@ export default function mstdog<D>(paths: { [key: string]: any }, options: Mstdog
 
     const mockData: { [key: string]: any } = {};
 
-    // Sort fields based on dependencies provided in options
     const fieldOrder = sortFieldsByDependencies(paths, _options.typeGeneratorDependencies || {}, schemaKey);
 
     fieldOrder.forEach(key => {
@@ -125,7 +124,13 @@ export default function mstdog<D>(paths: { [key: string]: any }, options: Mstdog
             enumValues: getEnumValues(field)
         };
 
-        // Generate field data
+        let refSchemaName = typeof field.options?.ref === 'function' ? field.options?.ref() : field.options?.ref;
+
+        if (refSchemaName && _options.handleRefs && _options.schemas && _options.schemas[refSchemaName]) {
+            mockData[key] = mstdog(_options.schemas[refSchemaName].paths, {..._options, currentDepth: 0}, key);
+            return;
+        }
+
         let value;
         if (field instanceof Schema) {
             value = mstdog(field.paths, { ..._options, currentDepth: _options.currentDepth }, key);
@@ -206,7 +211,7 @@ function handleStringType(options: FieldOptions): string {
 
     if (match) {
         const randexp = new RandExp(match);
-        randexp.max = maxLength || 10;  // Optionally limit max length to avoid excessive string length
+        randexp.max = maxLength || 10;
         return randexp.gen();
     }
 

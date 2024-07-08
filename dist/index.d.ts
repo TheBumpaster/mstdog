@@ -1,5 +1,11 @@
 import { Schema } from "mongoose";
-type MstdogOptions = {
+type CustomFieldGenerators = {
+    [key: string]: () => any;
+};
+type CustomTypeGenerators<D> = {
+    [type: string]: (mockData: D, options?: FieldOptions) => any;
+};
+export type MstdogOptions<D> = {
     arrayLength?: number;
     maxDepth?: number;
     currentDepth?: number;
@@ -7,16 +13,27 @@ type MstdogOptions = {
     schemas?: {
         [key: string]: Schema;
     };
-    customFieldGenerators?: {
-        [key: string]: () => any;
-    };
-    typeGenerators?: {
-        [type: string]: () => any;
+    customFieldGenerators?: CustomFieldGenerators;
+    typeGenerators?: CustomTypeGenerators<D>;
+    typeGeneratorDependencies?: DependencyMap;
+};
+export type FieldOptions = {
+    fieldName: string;
+    enumValues?: string[];
+    minLength?: number;
+    maxLength?: number;
+    match?: RegExp;
+    min?: number;
+    max?: number;
+};
+type DependencyMap = {
+    [key: string]: {
+        [property: string]: string[];
     };
 };
-export default function mstdog(paths: {
+export default function mstdog<D>(paths: {
     [key: string]: any;
-}, options?: MstdogOptions): {
+}, options?: MstdogOptions<D>, schemaKey?: string): {
     [key: string]: any;
 };
 export {};

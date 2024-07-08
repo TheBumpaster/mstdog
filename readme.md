@@ -1,12 +1,24 @@
-# Mongoose Schema to Dummy Object Generator (mstdog)
+# Mongoose Schema to Dummy Object Generator
 
 Generate realistic mock data for your Mongoose schemas with ease.
 
----
+## Table of Contents
+
+- [Description](#description)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Basic Usage](#basic-usage)
+  - [Handling Different Field Types](#handling-different-field-types)
+  - [Custom Field Generators](#custom-field-generators)
+  - [Type Generators](#type-generators)
+  - [Handling Dependencies](#handling-dependencies)
+- [Options](#options)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Description
 
-`mstdog` is a simple and efficient tool to generate mock data based on your Mongoose schemas. Integrated with the `faker` library, it ensures that you get realistic mock data for each field type. It supports various field types, embedded subdocuments, arrays, and can now handle `ref` attributes to simulate population of referenced documents.
+`mstdog` is a simple and efficient tool to generate mock data based on your Mongoose schemas. It supports various field types, embedded subdocuments, arrays, and more. Integrated with the `faker` and `randexp` library, it ensures that you get realistic mock data for each field type.
 
 ## Installation
 
@@ -18,95 +30,149 @@ npm install mstdog --save-dev
 
 ## Usage
 
+### Basic Usage
+
 ```javascript
 import mstdog from 'mstdog';
-import { Schema, Types } from 'mongoose';
+import { Schema } from 'mongoose';
 
-// Define your Mongoose schema
-const yourSchema = new Schema({
+const userSchema = new Schema({
     name: String,
     age: Number,
     isActive: Boolean,
     birthdate: Date,
-    tags: [String], // Example of an array of basic types
-    profile: { type: Schema.Types.ObjectId, ref: 'Profile' }, // Example of a ref to another schema
-    details: { // Example of an embedded subdocument
-        address: {
-            street: String,
-            city: String
-        }
-    }
 });
 
-const mockData = mstdog(yourSchema.paths);
+const mockData = mstdog(userSchema.paths);
 console.log(mockData);
 ```
 
-### Supported Field Types
-
-- **String**: Supports `enum` values.
-- **Number**
-- **Date**
-- **Boolean**
-- **ObjectId**: Generates valid MongoDB ObjectIds.
-- **Mixed**: Handles fields of mixed types.
-- **Embedded subdocuments**: Recursively generates mock data for nested schemas.
-- **Arrays**: Supports arrays of basic types (`[String]`, `[Number]`, `[Date]`, etc.) and arrays of embedded subdocuments.
-- **References (`ref`)**: Optionally simulates the population of referenced documents.
-
-### Options
-
-`mstdog` supports several options to customize data generation, including advanced handling of document references:
-
--
-
-**arrayLength**: Specify the length of arrays to generate (default: `3`).
-- **maxDepth**: Limit the depth of nested objects generated (default: `5`).
-- **handleRefs**: Enable or disable the simulation of referenced documents (default: `false`).
-- **schemas**: Provide a map of schema definitions to support document references.
-- **customFieldGenerators**: Provide custom functions to generate data for specific fields.
-
-Example with options:
+### Handling Different Field Types
 
 ```javascript
-const profileSchema = new Schema({
-    age: Number,
-    interests: [String]
+const addressSchema = new Schema({
+    street: String,
+    city: String,
+    zipcode: String,
 });
 
-const options = {
-    arrayLength: 5, // Generate arrays with 5 elements
-    maxDepth: 3, // Limit nested objects to a depth of 3
-    handleRefs: true, // Enable handling of references
-    schemas: { // Required when handleRefs is true
-        Profile: profileSchema
+const educationSchema = new Schema({
+    degree: String,
+    institution: String,
+    year: Number,
+});
+
+const userSchema = new Schema({
+    name: String,
+    age: Number,
+    isActive: Boolean,
+    birthdate: Date,
+    bio: {
+        type: String,
+        text: true,
     },
+    address: addressSchema,
+    education: [educationSchema],
+    hobbies: [String],
+    scores: [Number],
+});
+
+const mockData = mstdog(userSchema.paths);
+console.log(mockData);
+```
+
+### Custom Field Generators
+
+```javascript
+const options = {
     customFieldGenerators: {
-        name: () => 'Custom Name' // Override data generation for 'name' field
+        name: () => 'Custom Name',
+        age: () => 25,
     }
 };
 
-const mockDataWithOptions = mstdog(yourSchema.paths, options);
-console.log(mockDataWithOptions);
+const mockData = mstdog(userSchema.paths, options);
+console.log(mockData);
 ```
 
 ### Type Generators
 
-`mstdog` allows you to customize how data is generated for specific types using the `typeGenerators` option. This enables overriding the default data generation logic provided by the library.
+```javascript
+const options = {
+    typeGenerators: {
+        string: () => 'Custom String',
+        number: () => 42,
+    }
+};
 
-Example using `typeGenerators`:
+const mockData = mstdog(userSchema.paths, options);
+console.log(mockData);
+```
+
+### Handling Dependencies
 
 ```javascript
 const options = {
     typeGenerators: {
-        string: () => 'Custom string',  // Applies to both `string` and `schemastring`
-        number: () => 42,
-        date: () => new Date('2020-01-01')
+        string: (mockData, fieldOptions) => {
+            if (fieldOptions?.fieldName === 'email') {
+                if (mockData.username) {
+                    return `${mockData.username}@example.com`;
+                } else {
+                    return "random@email.com"
+                }
+            }
+            
+            if (fieldOptions?.fieldName === 'username') {
+                return "generatedUsername";
+            }
+
+            return "randomString";
+        }
+    },
+    typeGeneratorDependencies: {
+        "root": {
+            "email": ["username"]
+        }
     }
 };
 
-const mockData = mstdog(yourSchema.paths, options);
+const mockData = mstdog(userSchema.paths, options);
 console.log(mockData);
+```
+
+## Options
+
+`mstdog` supports several options to customize data generation:
+
+- **arrayLength**: Specify the length of arrays to generate (default: `3`).
+- **maxDepth**: Limit the depth of nested objects generated (default: `5`).
+- **customFieldGenerators**: Provide custom functions to generate data for specific fields.
+- **typeGenerators**: Provide custom functions to generate data for specific types.
+- **typeGeneratorDependencies**: Define dependencies between fields to ensure correct generation order.
+
+Example with options:
+
+```javascript
+const options = {
+    arrayLength: 5, // Generate arrays with 5 elements
+    maxDepth: 3, // Limit nested objects to a depth of 3
+    customFieldGenerators: {
+        name: () => 'Custom Name', // Override data generation for 'name' field
+    },
+    typeGenerators: {
+        string: () => 'Custom String',
+        number: () => 42,
+    },
+    typeGeneratorDependencies: {
+        "root": {
+            "email": ["username"]
+        }
+    }
+};
+
+const mockDataWithOptions = mstdog(userSchema.paths, options);
+console.log(mockDataWithOptions);
 ```
 
 ## Contributing

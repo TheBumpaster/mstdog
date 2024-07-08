@@ -1,4 +1,4 @@
-import mstdog, { MstdogOptions } from '../index'; // Adjust the import path as necessary
+import mstdog, { MstdogOptions } from '../index';
 
 describe('Dynamic Data Generation with mstdog', () => {
     const userSchema = {
