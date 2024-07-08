@@ -5,6 +5,8 @@ type MstdogOptions = {
     arrayLength?: number;
     maxDepth?: number;
     currentDepth?: number;
+    handleRefs?: boolean;
+    schemas?: { [key: string]: Schema };
     customFieldGenerators?: {
         [key: string]: () => any;
     };
@@ -14,12 +16,15 @@ const defaultOptions: MstdogDefaultOptions = {
     arrayLength: 3,
     maxDepth: 5,
     currentDepth: 0,
+    handleRefs: false
 };
 
 type MstdogDefaultOptions =  {
     arrayLength: number;
     maxDepth: number;
     currentDepth: number;
+    handleRefs: boolean;
+    schemas?: { [key: string]: Schema };
     customFieldGenerators?: {
         [key: string]: () => any;
     };
@@ -42,6 +47,13 @@ export default function mstdog(paths: { [key: string]: any }, options: MstdogOpt
 
         if (_options.customFieldGenerators?.[key]) {
             mockData[key] = _options.customFieldGenerators[key]();
+            return;
+        }
+
+        let refSchemaName = typeof field.options?.ref === 'function' ? field.options?.ref() : field.options?.ref;
+
+        if (refSchemaName && _options.handleRefs && _options.schemas && _options.schemas[refSchemaName]) {
+            mockData[key] = mstdog(_options.schemas[refSchemaName].paths, {..._options, currentDepth: 0});
             return;
         }
 
