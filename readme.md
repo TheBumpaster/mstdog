@@ -21,21 +21,12 @@ npm install mstdog --save-dev
 
 ```javascript
 import mstdog from 'mstdog';
-import { Schema, Types } from 'mongoose';
 
-// Define your Mongoose schema
 const yourSchema = new Schema({
     name: String,
     age: Number,
     isActive: Boolean,
-    birthdate: Date,
-    tags: [String], // Example of an array of basic types
-    details: { // Example of an embedded subdocument
-        address: {
-            street: String,
-            city: String
-        }
-    }
+    birthdate: Date
 });
 
 const mockData = mstdog(yourSchema.paths);
@@ -44,37 +35,14 @@ console.log(mockData);
 
 ### Supported Field Types
 
-- **String**: Supports `enum` values.
-- **Number**
-- **Date**
-- **Boolean**
-- **ObjectId**: Generates valid MongoDB ObjectIds.
-- **Mixed**: Handles fields of mixed types.
-- **Embedded subdocuments**: Recursively generates mock data for nested schemas.
-- **Arrays**: Supports arrays of basic types (`[String]`, `[Number]`, `[Date]`, etc.) and arrays of embedded subdocuments (`[{ type: YourSubdocumentSchema }]`).
-
-### Options
-
-`mstdog` supports several options to customize data generation:
-
-- **arrayLength**: Specify the length of arrays to generate (default: `3`).
-- **maxDepth**: Limit the depth of nested objects generated (default: `5`).
-- **customFieldGenerators**: Provide custom functions to generate data for specific fields.
-
-Example with options:
-
-```javascript
-const options = {
-    arrayLength: 5, // Generate arrays with 5 elements
-    maxDepth: 3, // Limit nested objects to a depth of 3
-    customFieldGenerators: {
-        name: () => 'Custom Name' // Override data generation for 'name' field
-    }
-};
-
-const mockDataWithOptions = mstdog(yourSchema.paths, options);
-console.log(mockDataWithOptions);
-```
+- String _( supports enum )_
+- Number
+- Date
+- Boolean
+- ObjectId
+- Mixed
+- Embedded subdocuments
+- Arrays of basic types and subdocuments _( supports enum )_
 
 ## Contributing
 
